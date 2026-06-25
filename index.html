@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فرم ثبت و محاسبه نمرات دانشجویان</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700&display=swap');
+        
+        body { 
+            font-family: 'Vazirmatn', Tahoma, sans-serif; 
+            background-color: #f4f7f6; 
+            margin: 0; 
+            padding: 20px; 
+            color: #333; 
+        }
+        .container { 
+            max-width: 650px; 
+            background: #fff; 
+            margin: 20px auto; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+        }
+        h2 { 
+            text-align: center; 
+            color: #2c3e50; 
+            margin-bottom: 25px; 
+            border-bottom: 2px solid #3498db; 
+            padding-bottom: 10px; 
+        }
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        label { 
+            display: block; 
+            font-weight: bold; 
+            margin-bottom: 8px; 
+            color: #34495e; 
+        }
+        input[type="text"], input[type="number"] { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-family: inherit; 
+            font-size: 14px;
+        }
+        input:focus { 
+            border-color: #3498db; 
+            outline: none; 
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        .section-title { 
+            font-size: 16px; 
+            font-weight: bold; 
+            color: #2980b9; 
+            margin-top: 25px; 
+            margin-bottom: 15px; 
+            background: #e8f4f8; 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+        }
+        .checkbox-group { 
+            display: grid; 
+            gap: 10px; 
+            background: #fafafa; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 1px solid #eee; 
+        }
+        .checkbox-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .checkbox-item input { 
+            width: 18px; 
+            height: 18px; 
+            cursor: pointer;
+        }
+        .hint { 
+            font-size: 12px; 
+            color: #7f8c8d; 
+            margin-top: 4px; 
+        }
+        .result-box { 
+            background: #2ecc71; 
+            color: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center; 
+            font-size: 18px; 
+            font-weight: bold; 
+            margin-top: 25px; 
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
+        }
+        button { 
+            width: 100%; 
+            background-color: #3498db; 
+            color: white; 
+            border: none; 
+            padding: 12px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin-top: 20px; 
+            font-family: inherit; 
+            transition: background 0.3s;
+        }
+        button:hover { 
+            background-color: #2980b9; 
+        }
+        #statusMessage { 
+            text-align: center; 
+            margin-top: 15px; 
+            font-weight: bold; 
+        }
+        .success { color: #2ecc71; }
+        .error { color: #e74c3c; }
+        .penalty-box { border-left: 4px solid #e74c3c; padding-right: 10px; }
+        .bonus-box { border-left: 4px solid #2ecc71; padding-right: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>فرم محاسبه و ثبت نمرات دانشجویان</h2>
+    
+    <form id="gradingForm">
+        <div class="form-group">
+            <label for="studentName">نام و نام خانوادگی دانشجو:</label>
+            <input type="text" id="studentName" required placeholder="مثال: علی رضایی">
+        </div>
+        
+        <div class="form-group">
+            <label for="studentId">شماره دانشجویی:</label>
+            <input type="text" id="studentId" required placeholder="مثال: 99123456">
+        </div>
+
+        <div class="section-title">۱. دوره‌های آموزش مجازی دانشگاهیان (سامانه نهاد)</div>
+        <div class="form-group">
+            <label for="virtualSessions">تعداد جلسات گذرانده شده در نهاد:</label>
+            <input type="number" id="virtualSessions" min="0" max="14" value="0" oninput="calculateTotalScore()">
+            <div class="hint">به ازای هر جلسه ۳/۱۴ نمره لحاظ می‌شود (۱۴ جلسه کامل = ۳ نمره).</div>
+        </div>
+
+        <div class="section-title">۲. فعالیت‌های کلاسی و حضور غیاب (حداکثر ۱۰ نمره)</div>
+        
+        <div class="form-group penalty-box">
+            <label for="absences">تعداد غیبت‌ها:</label>
+            <input type="number" id="absences" min="0" value="0" oninput="calculateTotalScore()">
+            <div class="hint" style="color: #e74c3c;">به ازای هر غیبت، ۰.۲۵ نمره از جمع فعالیت کلاسی کسر می‌شود.</div>
+        </div>
+
+        <div class="checkbox-group" style="margin-top: 15px;">
+            <div class="checkbox-item">
+                <input type="checkbox" id="attendance" onchange="calculateTotalScore()">
+                <label for="attendance">حضور منظم در کلاس (۲ نمره)</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="presentation" onchange="calculateTotalScore()">
+                <label for="presentation">ارائه کلاسی به صورت گروهی (۳ نمره)</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="forum" onchange="calculateTotalScore()">
+                <label for="forum">شرکت در کرسی‌های آزاد اندیشی (۲ نمره)</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="documentary" onchange="calculateTotalScore()">
+                <label for="documentary">تحلیل مستندها و تکالیف لازم (۳ نمره)</label>
+            </div>
+        </div>
+
+        <div class="section-title">۳. فعالیت‌های تشویقی (فرادرس)</div>
+        <div class="form-group bonus-box">
+            <label for="faradarsSessions">تعداد جلسات فرادرس گذرانده شده:</label>
+            <input type="number" id="faradarsSessions" min="0" value="0" oninput="calculateTotalScore()">
+            <div class="hint" style="color: #2ecc71;">هر ۴ جلسه ۲ نمره تشویقی دارد؛ جلسات اضافی (باقی‌مانده) هر کدام ۰.۲۵ نمره دارند.</div>
+        </div>
+
+        <div class="result-box">
+            مجموع نمره محاسبه شده: <span id="totalScore">0</span> از ۲۰
+        </div>
+
+        <button type="submit" id="submitBtn">ثبت و ارسال به فایل اکسل (گوگل درایو)</button>
+        <div id="statusMessage"></div>
+    </form>
+</div>
+
+<script>
+    function calculateTotalScore() {
+        let total = 0;
+
+        // ۱. محاسبه نمره سامانه نهاد (هر جلسه ۳/۱۴ نمره - سقف ۳ نمره)
+        const sessions = parseInt(document.getElementById('virtualSessions').value) || 0;
+        let virtualScore = sessions * (3 / 14);
+        if (virtualScore > 3) virtualScore = 3; 
+        total += virtualScore;
+
+        // ۲. فعالیت‌های کلاسی (حداکثر ۱۰ نمره)
+        let activityScore = 0;
+        if (document.getElementById('attendance').checked) activityScore += 2;
+        if (document.getElementById('presentation').checked) activityScore += 3;
+        if (document.getElementById('forum').checked) activityScore += 2;
+        if (document.getElementById('documentary').checked) activityScore += 3;
+        
+        activityScore = Math.min(activityScore, 10);
+
+        // اعمال جریمه غیبت‌ها (کسر ۰.۲۵ به ازای هر غیبت از نمره فعالیت کلاسی)
+        const absences = parseInt(document.getElementById('absences').value) || 0;
+        const penalty = absences * 0.25;
+        activityScore -= penalty;
+        
+        if (activityScore < 0) activityScore = 0;
+        total += activityScore;
+
+        // ۳. محاسبه نمره تشویقی فرادرس
+        const faradarsSessions = parseInt(document.getElementById('faradarsSessions').value) || 0;
+        let faradarsBlocks = Math.floor(faradarsSessions / 4);
+        let remainingSessions = faradarsSessions % 4;
+        let faradarsScore = (faradarsBlocks * 2) + (remainingSessions * 0.25);
+        total += faradarsScore;
+
+        // سقف نهایی نمره کل درس ۲۰ است
+        if (total > 20) total = 20;
+
+        // نمایش آنلاین با ۲ رقم اعشار
+        document.getElementById('totalScore').innerText = total.toFixed(2);
+        
+        return {
+            total: total.toFixed(2),
+            virtualSessions: sessions,
+            virtualScore: virtualScore.toFixed(2),
+            absences: absences,
+            activityScore: activityScore.toFixed(2),
+            faradarsSessions: faradarsSessions,
+            faradarsScore: faradarsScore.toFixed(2)
+        };
+    }
+
+    // فرآیند ارسال داده‌ها به گوگل اپس اسکریپت
+    document.getElementById('gradingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        // لینک اختصاصی و فعال وب‌اپلیکیشن شما
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbx0-lADCTk_2xPH6bhZBfcAWXeG2KLuU_Gu8-pwh2Doz30Ez6fe8DwCaa0z85gTAfZD_A/exec';
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'در حال ارسال اطلاعات...';
+        statusMessage.className = '';
+        statusMessage.innerText = '';
+
+        const scores = calculateTotalScore();
+        
+        let requestBody = new FormData();
+        requestBody.append('studentName', document.getElementById('studentName').value);
+        requestBody.append('studentId', document.getElementById('studentId').value);
+        requestBody.append('virtualSessions', scores.virtualSessions);
+        requestBody.append('virtualScore', scores.virtualScore);
+        requestBody.append('absences', scores.absences);
+        requestBody.append('activityScore', scores.activityScore);
+        requestBody.append('faradarsSessions', scores.faradarsSessions);
+        requestBody.append('faradarsScore', scores.faradarsScore);
+        requestBody.append('totalScore', scores.total);
+        requestBody.append('date', new Date().toLocaleString('fa-IR'));
+
+        fetch(scriptURL, { method: 'POST', body: requestBody })
+        .then(response => {
+            statusMessage.className = 'success';
+            statusMessage.innerText = 'اطلاعات با موفقیت محاسبه و در فایل اکسل ذخیره شد!';
+            document.getElementById('gradingForm').reset();
+            calculateTotalScore();
+        })
+        .catch(error => {
+            statusMessage.className = 'error';
+            statusMessage.innerText = 'خطا در برقراری ارتباط با گوگل درایو.';
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'ثبت و ارسال به فایل اکسل (گوگل درایو)';
+        });
+    });
+</script>
+
+</body>
+</html>
