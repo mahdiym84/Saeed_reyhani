@@ -140,6 +140,11 @@
             <input type="text" id="studentId" required placeholder="مثال: 99123456">
         </div>
 
+        <div class="form-group">
+            <label for="mobile">شماره موبایل:</label>
+            <input type="text" id="mobile" required placeholder="09123456789">
+        </div>
+
         <div class="section-title">۱. دوره‌های آموزش مجازی دانشگاهیان (سامانه نهاد)</div>
         <div class="form-group">
             <label for="virtualSessions">تعداد جلسات گذرانده شده در نهاد:</label>
@@ -181,7 +186,21 @@
             <div class="hint" style="color: #2ecc71;">هر ۴ جلسه ۲ نمره تشویقی دارد؛ جلسات اضافی (باقی‌مانده) هر کدام ۰.۲۵ نمره دارند.</div>
         </div>
 
-        <div class="result-box">
+        <div class="section-title">۴. اطلاعات تکمیلی</div>
+<div class="form-group">
+<label>تعداد چالش‌نوردی:</label>
+<input type="number" id="challengeCount" min="0" value="0" oninput="calculateTotalScore()">
+</div>
+<div class="form-group">
+<label>آیا مایل به برگزاری فرادرس هستید؟</label>
+<select id="teachFaradars"><option>بله</option><option>خیر</option></select>
+</div>
+<div class="form-group">
+<label>آیا فعالیت ویژه‌ای در طول ترم داشتید؟</label>
+<select id="specialActivity"><option>خیر</option><option>بله</option></select>
+</div>
+
+<div class="result-box">
             مجموع نمره محاسبه شده: <span id="totalScore">0</span> از ۲۰
         </div>
 
@@ -223,6 +242,9 @@
         let remainingSessions = faradarsSessions % 4;
         let faradarsScore = (faradarsBlocks * 2) + (remainingSessions * 0.25);
         total += faradarsScore;
+        const challengeCount=parseInt(document.getElementById('challengeCount').value)||0;
+        const challengeScore=challengeCount*0.25;
+        total+=challengeScore;
 
         // سقف نهایی نمره کل درس ۲۰ است
         if (total > 20) total = 20;
@@ -261,6 +283,10 @@
         let requestBody = new FormData();
         requestBody.append('studentName', document.getElementById('studentName').value);
         requestBody.append('studentId', document.getElementById('studentId').value);
+        requestBody.append('mobile', document.getElementById('mobile').value);
+        requestBody.append('challengeCount', document.getElementById('challengeCount').value);
+        requestBody.append('teachFaradars', document.getElementById('teachFaradars').value);
+        requestBody.append('specialActivity', document.getElementById('specialActivity').value);
         requestBody.append('virtualSessions', scores.virtualSessions);
         requestBody.append('virtualScore', scores.virtualScore);
         requestBody.append('absences', scores.absences);
